@@ -1,0 +1,17 @@
+# Release artifacts and local Python state
+*.zip
+*.7z
+*.rar
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+.env
+.env.*
+*.log
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+
+# The bundled spreadsheet data is synthetic test data and is intentionally tracked.
