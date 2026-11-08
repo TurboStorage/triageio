@@ -4,6 +4,7 @@ import sys
 from tabulate import tabulate
 from triageio.processor import TelemetryProcessor
 from triageio.analyzer import TelemetryAnalyzer
+from triageio.sanitize import sanitize_df
 
 def main():
     parser = argparse.ArgumentParser(description='TriageIO - Statistical Processor for Enterprise Storage Telemetry')
@@ -64,7 +65,7 @@ def main():
     print(tabulate(display_df[display_cols], headers='keys', tablefmt='psql', showindex=False))
 
     # Save detailed report
-    df.to_csv(args.output_csv, index=False)
+    sanitize_df(df).to_csv(args.output_csv, index=False)
     print(f"\n[+] Detailed analysis report saved to: {args.output_csv}")
 
 if __name__ == '__main__':

@@ -14,6 +14,7 @@ import re
 from datetime import datetime
 from triageio.processor import TelemetryProcessor
 from triageio.analyzer import TelemetryAnalyzer
+from triageio.sanitize import sanitize_df
 
 # --- MASTER DESIGN PALETTE ---
 BG_MAIN, BG_CARD = "#0f172a", "#1e293b"
@@ -1922,7 +1923,7 @@ class TriageIODesktop:
         if not path:
             return
         try:
-            self.current_df.to_csv(path, index=False)
+            sanitize_df(self.current_df).to_csv(path, index=False)
             messagebox.showinfo("Export Complete", f"Full pool CSV saved:\n{path}")
         except Exception as e:
             messagebox.showerror("Export Failed", str(e))
@@ -1933,7 +1934,7 @@ class TriageIODesktop:
             return
         try:
             rma = self.current_df[self.current_df['Overall Status'] == 'ERROR']
-            rma.to_csv(path, index=False)
+            sanitize_df(rma).to_csv(path, index=False)
             messagebox.showinfo("Export Complete",
                                 f"RMA Priority List saved ({len(rma)} drives):\n{path}")
         except Exception as e:
@@ -1946,7 +1947,7 @@ class TriageIODesktop:
         try:
             analyzer = TelemetryAnalyzer(self.current_df)
             anom = analyzer.detect_anomalies()
-            anom.to_csv(path, index=False)
+            sanitize_df(anom).to_csv(path, index=False)
             messagebox.showinfo("Export Complete",
                                 f"Anomaly Report saved ({len(anom)} flagged drives):\n{path}")
         except Exception as e:
@@ -1959,7 +1960,7 @@ class TriageIODesktop:
         try:
             analyzer = TelemetryAnalyzer(self.current_df)
             agg = analyzer.get_aggregation_summary()
-            agg.to_csv(path, index=False)
+            sanitize_df(agg).to_csv(path, index=False)
             messagebox.showinfo("Export Complete", f"Pool Stats Summary saved:\n{path}")
         except Exception as e:
             messagebox.showerror("Export Failed", str(e))
@@ -2018,14 +2019,14 @@ class TriageIODesktop:
             perc_df  = pd.DataFrame(perc_rows)
 
             with pd.ExcelWriter(path, engine='openpyxl') as writer:
-                self.current_df.to_excel(writer, sheet_name="Pool Data",       index=False)
-                rma_df.to_excel(         writer, sheet_name="RMA Priority List", index=False)
-                agg_df.to_excel(         writer, sheet_name="Aggregations",      index=False)
+                sanitize_df(self.current_df).to_excel(writer, sheet_name="Pool Data",       index=False)
+                sanitize_df(rma_df).to_excel(writer, sheet_name="RMA Priority List", index=False)
+                sanitize_df(agg_df).to_excel(writer, sheet_name="Aggregations",      index=False)
                 if not anom_df.empty:
-                    anom_df.to_excel(    writer, sheet_name="Anomaly Report",    index=False)
+                    sanitize_df(anom_df).to_excel(writer, sheet_name="Anomaly Report",    index=False)
                 if not eol_df.empty:
-                    eol_df.to_excel(     writer, sheet_name="EOL Predictions",   index=False)
-                perc_df.to_excel(        writer, sheet_name="Percentiles",       index=False)
+                    sanitize_df(eol_df).to_excel(writer, sheet_name="EOL Predictions",   index=False)
+                sanitize_df(perc_df).to_excel(writer, sheet_name="Percentiles",       index=False)
 
             messagebox.showinfo("Export Complete",
                                 f"Multi-Sheet Excel saved (6 sheets):\n{path}")
